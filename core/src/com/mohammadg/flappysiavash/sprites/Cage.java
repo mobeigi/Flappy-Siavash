@@ -1,5 +1,6 @@
 package com.mohammadg.flappysiavash.sprites;
 
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -7,26 +8,30 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.Random;
 
 public class Cage {
-    private static final int MOVE_SPEED = 1; //speed which cages move towards player (to the left)
-    private static final int FLUCTUATION = 130;
+    public static final int MOVE_SPEED = 1; //speed which cages move towards player (to the left)
+    private static final int CAGE_HEIGHT_PADDING = 35; //minimum space between bot/top of viewport and end of cage
     private static final int CAGE_GAP = 100; //gap between top/bot cages
-    private static final int LOWEST_OPENING = 120; //lowest position possible for opening
     public static final int BASE_POSITION = 100; //starting position of very first cage
 
     private Texture topCage, botCage;
     private Vector2 topCagePos, botCagePos;
     private Rectangle topCageBounds, botCageBounds;
     private Random rand;
+    private int lowestOpening = 0;
+    private OrthographicCamera cam;
 
-    public Cage(float x) {
+    public Cage(OrthographicCamera cam, float x, int lowestOpening) {
+        this.cam = cam;
         topCage = new Texture("topcage.png");
         botCage = new Texture("bottomcage.png");
 
-        rand = new Random();
-        topCagePos = new Vector2(0,0);
-        botCagePos = new Vector2(0,0);
+        rand = new Random(System.currentTimeMillis());
+        topCagePos = new Vector2();
+        botCagePos = new Vector2();
         topCageBounds = new Rectangle();
         botCageBounds = new Rectangle();
+
+        this.lowestOpening = lowestOpening;
 
         this.reposition(x);
     }
@@ -48,8 +53,9 @@ public class Cage {
 
     public void reposition(float x) {
         //Position
-        this.topCagePos.set(BASE_POSITION + x, rand.nextInt(FLUCTUATION) + CAGE_GAP + LOWEST_OPENING);
-        this.botCagePos.set(BASE_POSITION + x, topCagePos.y - CAGE_GAP - botCage.getHeight());
+        this.topCagePos.set(BASE_POSITION + x, lowestOpening + CAGE_GAP + CAGE_HEIGHT_PADDING +
+            rand.nextInt((int) (cam.viewportHeight - lowestOpening - CAGE_GAP - 2*CAGE_HEIGHT_PADDING)));
+        this.botCagePos.set(BASE_POSITION + x, topCagePos.y - botCage.getHeight() - CAGE_GAP);
 
         //Set bounds
         this.topCageBounds.set(topCagePos.x, topCagePos.y, topCage.getWidth(), topCage.getHeight());
