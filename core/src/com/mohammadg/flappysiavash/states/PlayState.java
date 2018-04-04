@@ -3,7 +3,11 @@ package com.mohammadg.flappysiavash.states;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Timer;
 import com.mohammadg.flappysiavash.FlappySiavashGame;
 import com.mohammadg.flappysiavash.sprites.Cage;
@@ -29,6 +33,10 @@ public class PlayState extends State {
     private boolean isGameOverCooldownTime;
     private float gameOverFlashDt;
     private ArrayList<Cage> cages;
+    private int score;
+    private ShaderProgram fontShader;
+    private BitmapFont eightBitWonder;
+    GlyphLayout glyphLayout;
 
     protected PlayState(GameStateManager gsm) {
         super(gsm);
@@ -55,6 +63,19 @@ public class PlayState extends State {
             cages.add(cage);
             basePos += cage.getTopCage().getWidth() + (cam.viewportWidth / NUM_CAGES_PER_VIEWPORT);
         }
+
+        score = 0;
+
+        fontShader = new ShaderProgram(Gdx.files.internal("8bitwonder.vert"), Gdx.files.internal("8bitwonder.frag"));
+        if (!fontShader.isCompiled()) {
+            Gdx.app.error("fontShader", "compilation failed:\n" + fontShader.getLog());
+        }
+
+        Texture eightBitWonderTexture = new Texture(Gdx.files.internal("8bitwonder.png"), true);
+        eightBitWonderTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        eightBitWonder = new BitmapFont(Gdx.files.internal("8bitwonder.fnt"), new TextureRegion(eightBitWonderTexture), false);
+
+        glyphLayout = new GlyphLayout();
     }
 
     @Override
@@ -111,8 +132,9 @@ public class PlayState extends State {
 
             //Check if we just cleared a cage (are past it)
             if (siavash.getPosition().x + (siavash.getTexture().getWidth()/2) == cage.getTopCagePos().x + cage.getTopCage().getWidth()) {
-                //Play victory sound
+                //Play victory sound and increment score
                 siavash.playChirpSound();
+                ++score;
             }
         }
 
@@ -149,6 +171,26 @@ public class PlayState extends State {
                 (int) (ground.getGround().getWidth() + groundDx), ground.getGround().getHeight(),
                 ground.getGround().getWidth(), ground.getGround().getHeight());
 
+
+        //Draw score on screen using font shader
+        sb.setShader(fontShader);
+
+        //Replace number 0 in score with letter O as the 0 looks like an 8
+        String scoreStr = Integer.toString(score).replace('0', 'O');
+
+        //Draw score twice, white over black to simulate some bottom-right corner drop shadow
+        eightBitWonder.getData().setScale(0.70f);
+        eightBitWonder.setColor(Color.BLACK);
+        glyphLayout.setText(eightBitWonder, scoreStr);
+        eightBitWonder.draw(sb, glyphLayout, cam.viewportWidth/2 - glyphLayout.width/2, cam.viewportHeight*0.95f);
+
+        eightBitWonder.getData().setScale(0.65f);
+        eightBitWonder.setColor(Color.WHITE);
+        glyphLayout.setText(eightBitWonder, scoreStr);
+        eightBitWonder.draw(sb, glyphLayout, cam.viewportWidth/2 - glyphLayout.width/2, cam.viewportHeight*0.95f);
+
+        sb.setShader(null);
+
         //If player is not alive and we need to draw flash effect using shape renderer
         if (!alive && gameOverFlashDt >= 0) {
             Texture texture = new Texture("white1x1pixel.png");
@@ -157,7 +199,6 @@ public class PlayState extends State {
             sb.draw(texture, 0, 0, (int) cam.viewportWidth, (int) cam.viewportHeight);
             sb.setColor(c);
         }
-
 
         sb.end();
     }
