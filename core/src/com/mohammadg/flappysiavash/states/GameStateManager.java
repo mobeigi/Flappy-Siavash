@@ -20,8 +20,9 @@ public class GameStateManager {
         return this.states.pop();
     }
 
+    //Set new state (pops current stage calling dispose and pushes new state).
     public void set(State state) {
-        this.states.pop();
+        this.states.pop().dispose();
         this.states.push(state);
     }
 
