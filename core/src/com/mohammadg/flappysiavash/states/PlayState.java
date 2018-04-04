@@ -34,8 +34,7 @@ public class PlayState extends State {
         ground.getGround().setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat); //set texture to repeat on x
         groundDx = 0.0f;
 
-        siavash = new Siavash(cam, (int)(cam.viewportWidth*0.20), (int)(cam.viewportHeight*0.75));
-        //siavash = new Siavash(cam, 50, 300);
+        siavash = new Siavash(cam, (int)(cam.viewportWidth*0.20), (int)(cam.viewportHeight*0.75)); //starting position
 
         cages = new ArrayList<Cage>();
         int basePos = (int)cam.viewportWidth; //Start at viewport width to create initial opening
