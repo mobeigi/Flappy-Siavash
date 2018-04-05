@@ -13,7 +13,7 @@ public class MenuState extends State {
     public MenuState(GameStateManager gsm) {
         super(gsm);
 
-        cam.setToOrtho(false, FlappySiavashGame.WIDTH, FlappySiavashGame.HEIGHT);
+        cam.setToOrtho(false, FlappySiavashGame.WIDTH/2, FlappySiavashGame.HEIGHT/2);
 
         this.background = new Texture("bg.png");
         this.playButton = new Texture("playbutton.png");
@@ -35,7 +35,9 @@ public class MenuState extends State {
     public void render(SpriteBatch sb) {
         sb.setProjectionMatrix(cam.combined);
         sb.begin();
-        sb.draw(background, 0, 0, cam.viewportWidth, cam.viewportHeight);
+        sb.draw(background, cam.position.x - (cam.viewportWidth/2), 0,
+                background.getWidth(), background.getHeight());
+
         sb.draw(playButton, (cam.viewportWidth/2) - (playButton.getWidth()/2),
                             (cam.viewportHeight/2) - (playButton.getHeight()/2));
         sb.end();

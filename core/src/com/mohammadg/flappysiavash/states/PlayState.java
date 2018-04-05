@@ -4,11 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.mohammadg.flappysiavash.FlappySiavashGame;
 import com.mohammadg.flappysiavash.Helper;
 import com.mohammadg.flappysiavash.sprites.Cage;
@@ -55,7 +51,7 @@ public class PlayState extends State {
         background.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat); //set texture to repeat on x
         backgroundDx = 0.0f;
 
-        ground = new Ground();
+        ground = new Ground(0,0, (int)cam.viewportWidth, (int)(cam.viewportHeight*0.12f));
         ground.getGround().setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat); //set texture to repeat on x
         groundDx = 0.0f;
 
@@ -137,8 +133,8 @@ public class PlayState extends State {
             }
 
             //Update scrolling background dx values
-            backgroundDx += BACKGROUND_DELTA_X;
-            groundDx += GROUND_DELTA_X;
+            backgroundDx = (backgroundDx + BACKGROUND_DELTA_X) % background.getWidth();
+            groundDx = (groundDx + GROUND_DELTA_X) % ground.getGround().getWidth();
         }
         else if (stage == Stage.CRASHING) {
             //Change dt for flash effect
@@ -185,9 +181,8 @@ public class PlayState extends State {
 
         //Draw scrolling ground
         sb.draw(ground.getGround(), cam.position.x - (cam.viewportWidth/2), 0,
-                (int) (ground.getGround().getWidth() + groundDx), ground.getGround().getHeight(),
-                ground.getGround().getWidth(), ground.getGround().getHeight());
-
+                (int) (ground.getGround().getWidth() + groundDx), (int)ground.getGround().getHeight(),
+                (int)ground.getDimensions().x, (int)ground.getDimensions().y);
 
         //Draw score on screen using font shader
         if (stage == Stage.MAIN || stage == Stage.CRASHING || stage == Stage.GAMEOVER_COOLDOWN) {

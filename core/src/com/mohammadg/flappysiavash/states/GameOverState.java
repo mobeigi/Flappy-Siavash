@@ -3,15 +3,12 @@ package com.mohammadg.flappysiavash.states;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.mohammadg.flappysiavash.FlappySiavashGame;
 import com.mohammadg.flappysiavash.Helper;
-import org.w3c.dom.css.Rect;
 
 public class GameOverState extends State {
 

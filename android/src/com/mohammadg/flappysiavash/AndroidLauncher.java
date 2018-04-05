@@ -2,11 +2,9 @@ package com.mohammadg.flappysiavash;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.badlogic.gdx.backends.android.surfaceview.RatioResolutionStrategy;
-import com.mohammadg.flappysiavash.FlappySiavashGame;
 
 public class AndroidLauncher extends AndroidApplication {
 	@Override

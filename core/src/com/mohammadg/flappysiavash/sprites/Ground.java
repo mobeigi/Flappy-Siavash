@@ -9,15 +9,10 @@ public class Ground {
     private Vector2 dimensions;
     private Rectangle bounds;
 
-    public  Ground() {
-        this(0,0);
-    }
-
-    public Ground(int x, int y) {
+    public Ground(int x, int y, int width, int height) {
         ground = new Texture("ground.png");
-
-        dimensions = new Vector2(ground.getWidth(), ground.getHeight());
-        bounds = new Rectangle(x, y, ground.getWidth(), ground.getHeight());
+        dimensions = new Vector2(width, height);
+        bounds = new Rectangle(x, y, width, height);
     }
 
     public void dispose() {
@@ -27,6 +22,7 @@ public class Ground {
     public boolean collides(Rectangle playerBounds) {
         return playerBounds.overlaps(this.bounds);
     }
+
     //Getter
     public Texture getGround() {
         return ground;
