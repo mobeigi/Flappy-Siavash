@@ -22,6 +22,7 @@ public class Siavash {
 
     private Texture siavashTexture;
     private Animation siavashAnimation;
+
     private Rectangle bounds;
     private OrthographicCamera cam;
 

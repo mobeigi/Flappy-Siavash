@@ -1,15 +1,18 @@
 package com.mohammadg.flappysiavash.states;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mohammadg.flappysiavash.AssetManager;
 
 import java.util.Stack;
 
 public class GameStateManager {
 
     private Stack<State> states;
+    AssetManager assetManager;
 
     public GameStateManager() {
         this.states = new Stack<State>();
+        this.assetManager = new AssetManager();
     }
 
     public void push(State state) {

@@ -1,6 +1,7 @@
 package com.mohammadg.flappysiavash.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -9,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.mohammadg.flappysiavash.FlappySiavashGame;
+import com.mohammadg.flappysiavash.Helper;
 import com.mohammadg.flappysiavash.sprites.Cage;
 import com.mohammadg.flappysiavash.sprites.Ground;
 import com.mohammadg.flappysiavash.sprites.Siavash;
@@ -38,14 +40,11 @@ public class PlayState extends State {
     private float gameOverFlashDt;
     private ArrayList<Cage> cages;
     private int score;
-    private ShaderProgram fontShader;
-    private BitmapFont eightBitWonder;
-    private GlyphLayout glyphLayout;
     private Stage stage;
 
     private GameOverState gameOverState;
     private float gameOverCooldownCounter;
-
+    Preferences preferences;
 
     protected PlayState(GameStateManager gsm) {
         super(gsm);
@@ -74,22 +73,13 @@ public class PlayState extends State {
 
         score = 0;
 
-        fontShader = new ShaderProgram(Gdx.files.internal("8bitwonder.vert"), Gdx.files.internal("8bitwonder.frag"));
-        if (!fontShader.isCompiled()) {
-            Gdx.app.error("fontShader", "compilation failed:\n" + fontShader.getLog());
-        }
-
-        Texture eightBitWonderTexture = new Texture(Gdx.files.internal("8bitwonder.png"), true);
-        eightBitWonderTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        eightBitWonder = new BitmapFont(Gdx.files.internal("8bitwonder.fnt"), new TextureRegion(eightBitWonderTexture), false);
-
-        glyphLayout = new GlyphLayout();
-
         stage = Stage.MAIN;
 
         gameOverState = new GameOverState(gsm);
 
         gameOverCooldownCounter = 0.0f;
+
+        preferences = Gdx.app.getPreferences("FlappySiavash Storage");
     }
 
     @Override
@@ -97,6 +87,9 @@ public class PlayState extends State {
         if (stage == Stage.MAIN) {
             if (Gdx.input.justTouched())
                 siavash.jump();
+        }
+        else if (stage == Stage.GAMEOVER_POST) {
+            gameOverState.handleInput();
         }
     }
 
@@ -130,6 +123,17 @@ public class PlayState extends State {
             if (playerCollides()) {
                 siavash.playCrySound();
                 stage = Stage.CRASHING;
+
+                //Check scores
+                gameOverState.setFinalScore(this.score);
+
+                int highscore = preferences.getInteger("highscore", 0);
+                if (this.score > highscore) {
+                    highscore = this.score;
+                    preferences.putInteger("highscore", highscore);
+                    preferences.flush();
+                }
+                gameOverState.setHighScore(highscore);
             }
 
             //Update scrolling background dx values
@@ -158,7 +162,7 @@ public class PlayState extends State {
                 stage = Stage.GAMEOVER_POST;
         }
         else if (stage == Stage.GAMEOVER_POST) {
-            //todo
+            gameOverState.update(dt);
         }
     }
 
@@ -186,24 +190,21 @@ public class PlayState extends State {
 
 
         //Draw score on screen using font shader
-        if (stage == Stage.MAIN || stage == Stage.CRASHING) {
-            sb.setShader(fontShader);
-
+        if (stage == Stage.MAIN || stage == Stage.CRASHING || stage == Stage.GAMEOVER_COOLDOWN) {
             //Replace number 0 in score with letter O as the 0 looks like an 8
             String scoreStr = Integer.toString(score).replace('0', 'O');
+            Color white = new Color(1.0f, 1.0f, 1.0f, 1.0f-gameOverCooldownCounter*2*0.75f);
+            Color black = new Color(0.0f, 0.0f, 0.0f, 1.0f-gameOverCooldownCounter*2);
 
-            //Draw score twice, white over black to simulate some bottom-right corner drop shadow
-            eightBitWonder.getData().setScale(0.70f);
-            eightBitWonder.setColor(Color.BLACK);
-            glyphLayout.setText(eightBitWonder, scoreStr);
-            eightBitWonder.draw(sb, glyphLayout, cam.viewportWidth / 2 - glyphLayout.width / 2, cam.viewportHeight * 0.95f);
+            Helper.PrepareDrawText(sb, gsm.assetManager.getEightBitWonder(), gsm.assetManager.getGlyphLayout(), scoreStr,
+                    black, 0.7f);
+            Helper.DrawText(sb, gsm.assetManager.getEightBitWonder(), gsm.assetManager.getGlyphLayout(), gsm.assetManager.getFontShader(),
+                    (cam.viewportWidth / 2) - (gsm.assetManager.getGlyphLayout().width / 2) + 1, cam.viewportHeight*0.95f - 1);
 
-            eightBitWonder.getData().setScale(0.65f);
-            eightBitWonder.setColor(Color.WHITE);
-            glyphLayout.setText(eightBitWonder, scoreStr);
-            eightBitWonder.draw(sb, glyphLayout, cam.viewportWidth / 2 - glyphLayout.width / 2, cam.viewportHeight * 0.95f);
-
-            sb.setShader(null);
+            Helper.PrepareDrawText(sb, gsm.assetManager.getEightBitWonder(), gsm.assetManager.getGlyphLayout(), scoreStr,
+                    white, 0.7f);
+            Helper.DrawText(sb, gsm.assetManager.getEightBitWonder(), gsm.assetManager.getGlyphLayout(), gsm.assetManager.getFontShader(),
+                    cam.viewportWidth / 2 - gsm.assetManager.getGlyphLayout().width / 2, cam.viewportHeight * 0.95f);
         }
 
         //Draw white flash (fade out from white) on screen as we crash
@@ -216,8 +217,7 @@ public class PlayState extends State {
         }
         sb.end();
 
-        //todo
-
+        //Check to see if game over state be shown
         if (stage == Stage.GAMEOVER_POST) {
             gameOverState.render(sb);
         }
