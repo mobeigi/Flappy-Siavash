@@ -38,7 +38,7 @@ public class Siavash {
         siavashAnimation = new Animation(siavashTexture, ANIMATION_FRAME_COUNT, ANIMATION_CYCLE_TIME);
 
         bounds = new Rectangle(x + (siavashAnimation.getFrame().getRegionWidth()*BOUND_SCALE)/2,
-                y + (siavashAnimation.getFrame().getRegionWidth()*BOUND_SCALE)/2,
+                y + (siavashAnimation.getFrame().getRegionHeight()*BOUND_SCALE)/2,
                 siavashAnimation.getFrame().getRegionWidth()*BOUND_SCALE,
                 siavashAnimation.getFrame().getRegionHeight()*BOUND_SCALE);
 
