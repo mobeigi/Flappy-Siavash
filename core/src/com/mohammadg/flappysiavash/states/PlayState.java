@@ -36,7 +36,7 @@ public class PlayState extends State {
     private int score;
     private ShaderProgram fontShader;
     private BitmapFont eightBitWonder;
-    GlyphLayout glyphLayout;
+    private GlyphLayout glyphLayout;
 
     protected PlayState(GameStateManager gsm) {
         super(gsm);

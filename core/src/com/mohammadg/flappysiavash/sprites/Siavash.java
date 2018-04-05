@@ -37,7 +37,9 @@ public class Siavash {
         siavashTexture = new Texture("siavash_spritesheet.png");
         siavashAnimation = new Animation(siavashTexture, ANIMATION_FRAME_COUNT, ANIMATION_CYCLE_TIME);
 
-        bounds = new Rectangle(x, y, siavashAnimation.getFrame().getRegionWidth()*BOUND_SCALE,
+        bounds = new Rectangle(x + (siavashAnimation.getFrame().getRegionWidth()*BOUND_SCALE)/2,
+                y + (siavashAnimation.getFrame().getRegionWidth()*BOUND_SCALE)/2,
+                siavashAnimation.getFrame().getRegionWidth()*BOUND_SCALE,
                 siavashAnimation.getFrame().getRegionHeight()*BOUND_SCALE);
 
         flap = Gdx.audio.newSound(Gdx.files.internal("sfx_wing.ogg"));
