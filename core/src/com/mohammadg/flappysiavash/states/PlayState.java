@@ -132,7 +132,7 @@ public class PlayState extends State {
             }
 
             //Check if we just cleared a cage (are past it)
-            if (siavash.getPosition().x + (siavash.getTexture().getWidth()/2) == cage.getTopCagePos().x + cage.getTopCage().getWidth()) {
+            if (siavash.getPosition().x + (siavash.getTextureRegion().getRegionWidth()/2) == cage.getTopCagePos().x + cage.getTopCage().getWidth()) {
                 //Play victory sound and increment score
                 siavash.playChirpSound();
                 ++score;
@@ -160,7 +160,7 @@ public class PlayState extends State {
                 (int) (background.getWidth() + backgroundDx), background.getHeight(),
                 background.getWidth(), background.getHeight());
 
-        sb.draw(siavash.getTexture(), siavash.getPosition().x, siavash.getPosition().y);
+        sb.draw(siavash.getTextureRegion(), siavash.getPosition().x, siavash.getPosition().y);
 
         for (Cage cage : cages) {
             sb.draw(cage.getTopCage(), cage.getTopCagePos().x, cage.getTopCagePos().y);

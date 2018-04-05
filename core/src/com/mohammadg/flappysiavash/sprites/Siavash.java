@@ -4,17 +4,24 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 public class Siavash {
     private static final int GRAVITY = -15;
     private static final int JUMP_UNITS = 250;
     private static final float BOUND_SCALE = 0.75f; //scale bounds width/height to provide fairer collision detection
 
+    private static final int ANIMATION_FRAME_COUNT = 3; //number of frames in sprite sheet
+    private static final float ANIMATION_CYCLE_TIME = 0.5f; //how long to show each frame
+
     private Vector2 position;
     private Vector2 velocity;
+
     private Texture siavashTexture;
+    private Animation siavashAnimation;
     private Rectangle bounds;
     private OrthographicCamera cam;
 
@@ -26,8 +33,12 @@ public class Siavash {
         this.cam = cam;
         position = new Vector2(x, y);
         velocity = new Vector2(0, 0);
-        siavashTexture = new Texture("siavash.png");
-        bounds = new Rectangle(x, y, siavashTexture.getWidth()*BOUND_SCALE, siavashTexture.getHeight()*BOUND_SCALE);
+
+        siavashTexture = new Texture("siavash_spritesheet.png");
+        siavashAnimation = new Animation(siavashTexture, ANIMATION_FRAME_COUNT, ANIMATION_CYCLE_TIME);
+
+        bounds = new Rectangle(x, y, siavashAnimation.getFrame().getRegionWidth()*BOUND_SCALE,
+                siavashAnimation.getFrame().getRegionHeight()*BOUND_SCALE);
 
         flap = Gdx.audio.newSound(Gdx.files.internal("sfx_wing.ogg"));
         chirp = Gdx.audio.newSound(Gdx.files.internal("sia_chirp.ogg"));
@@ -35,6 +46,9 @@ public class Siavash {
     }
 
     public void update(float dt) {
+        //Update sprite animation
+        siavashAnimation.update(dt);
+
         //If above lowest point, apply gravity
         if (position.y > 0)
             velocity.add(0, GRAVITY);
@@ -91,8 +105,8 @@ public class Siavash {
         return position;
     }
 
-    public Texture getTexture() {
-        return siavashTexture;
+    public TextureRegion getTextureRegion() {
+        return siavashAnimation.getFrame();
     }
 
     public Rectangle getBounds() {
