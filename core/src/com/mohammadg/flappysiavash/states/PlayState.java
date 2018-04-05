@@ -40,6 +40,7 @@ public class PlayState extends State {
 
     protected PlayState(GameStateManager gsm) {
         super(gsm);
+
         cam.setToOrtho(false, FlappySiavashGame.WIDTH/2, FlappySiavashGame.HEIGHT/2);
 
         background = new Texture("bg.png");
