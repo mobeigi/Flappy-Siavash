@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.utils.Timer;
 import com.mohammadg.flappysiavash.FlappySiavashGame;
 import com.mohammadg.flappysiavash.sprites.Cage;
 import com.mohammadg.flappysiavash.sprites.Ground;
@@ -20,23 +19,33 @@ public class PlayState extends State {
     private static final int NUM_CAGES_PER_VIEWPORT = 3; //number of cages that cag show at once in 1 viewport
     private static final float BACKGROUND_DELTA_X = 0.5f; //how much to scroll background each update
     private static final float GROUND_DELTA_X = (float)Cage.MOVE_SPEED; //how much to scroll ground each update
-    private static final float GAME_OVER_COOLDOWN_TIME = 1.5f;
+    private static final float GAME_OVER_COOLDOWN_TIME = 1.0f;
     private static final float GAME_OVER_FLASH_ALPHA_START = 0.8f;
     private static final float GAME_OVER_FLASH_ALPHA_DECREMENT_STEP = 0.05f;
+
+    public enum Stage {
+        MAIN, //Actively playing
+        CRASHING, //Collided with object and falling towards ground
+        GAMEOVER_COOLDOWN, //Collided with ground and waiting
+        GAMEOVER_POST, //Game is now over, show game over menu
+    }
 
     private Texture background;
     private float backgroundDx;
     private Ground ground;
     private float groundDx;
     private Siavash siavash;
-    private boolean alive;
-    private boolean isGameOverCooldownTime;
     private float gameOverFlashDt;
     private ArrayList<Cage> cages;
     private int score;
     private ShaderProgram fontShader;
     private BitmapFont eightBitWonder;
     private GlyphLayout glyphLayout;
+    private Stage stage;
+
+    private GameOverState gameOverState;
+    private float gameOverCooldownCounter;
+
 
     protected PlayState(GameStateManager gsm) {
         super(gsm);
@@ -52,8 +61,6 @@ public class PlayState extends State {
         groundDx = 0.0f;
 
         siavash = new Siavash(cam, (int)(cam.viewportWidth*0.20), (int)(cam.viewportHeight*0.75)); //starting position
-        alive = true;
-        isGameOverCooldownTime = false;
         gameOverFlashDt = GAME_OVER_FLASH_ALPHA_START;
 
         cages = new ArrayList<Cage>();
@@ -77,77 +84,82 @@ public class PlayState extends State {
         eightBitWonder = new BitmapFont(Gdx.files.internal("8bitwonder.fnt"), new TextureRegion(eightBitWonderTexture), false);
 
         glyphLayout = new GlyphLayout();
+
+        stage = Stage.MAIN;
+
+        gameOverState = new GameOverState(gsm);
+
+        gameOverCooldownCounter = 0.0f;
     }
 
     @Override
     protected void handleInput() {
-        if (Gdx.input.justTouched())
-            siavash.jump();
+        if (stage == Stage.MAIN) {
+            if (Gdx.input.justTouched())
+                siavash.jump();
+        }
     }
 
     @Override
     public void update(float dt) {
-        //Player is no longer alive, pre cooldown time or cooldown time
-        if (!alive) {
-            gameOverFlashDt -= GAME_OVER_FLASH_ALPHA_DECREMENT_STEP;
-
-            //If we're in the cooldown time, exit at this point
-            if (isGameOverCooldownTime)
-                return;
-
-            //Once we've collided with ground, start cooldown time and schedule task to end this game
-            if (playerCollidesGround()) {
-                Timer t = new Timer();
-                t.scheduleTask(new Timer.Task() {
-                    @Override
-                    public void run() {
-                        gsm.set(new PlayState(gsm));
-                    }
-                }, GAME_OVER_COOLDOWN_TIME);
-
-                isGameOverCooldownTime = true;
-                return;
-            }
-
-            //Update siavash until gravity forces it to collide
-            siavash.update(dt);
-
-            return;
-        }
-
-
-        //Player is alive
+        //Handle input
         handleInput();
 
-        //Perform all updates
-        siavash.update(dt);
+        if (stage == Stage.MAIN) {
+            //Perform all updates
+            siavash.update(dt);
 
-        //Cage logic
-        for (Cage cage : cages) {
-            cage.update(dt);
+            //Cage logic
+            for (Cage cage : cages) {
+                cage.update(dt);
 
-            //If cage has moved off the viewport, reposition it
-            if (cage.getTopCagePos().x + cage.getTopCage().getWidth() < 0) {
-                cage.reposition(cam.viewportWidth);
+                //If cage has moved off the viewport, reposition it
+                if (cage.getTopCagePos().x + cage.getTopCage().getWidth() < 0) {
+                    cage.reposition(cam.viewportWidth);
+                }
+
+                //Check if we just cleared a cage (are past it)
+                if (siavash.getPosition().x + (siavash.getTextureRegion().getRegionWidth()/2) == cage.getTopCagePos().x + cage.getTopCage().getWidth()) {
+                    //Play victory sound and increment score
+                    siavash.playChirpSound();
+                    ++score;
+                }
             }
 
-            //Check if we just cleared a cage (are past it)
-            if (siavash.getPosition().x + (siavash.getTextureRegion().getRegionWidth()/2) == cage.getTopCagePos().x + cage.getTopCage().getWidth()) {
-                //Play victory sound and increment score
-                siavash.playChirpSound();
-                ++score;
+            //Collision detection
+            if (playerCollides()) {
+                siavash.playCrySound();
+                stage = Stage.CRASHING;
+            }
+
+            //Update scrolling background dx values
+            backgroundDx += BACKGROUND_DELTA_X;
+            groundDx += GROUND_DELTA_X;
+        }
+        else if (stage == Stage.CRASHING) {
+            //Change dt for flash effect
+            gameOverFlashDt -= GAME_OVER_FLASH_ALPHA_DECREMENT_STEP;
+
+            if (playerCollidesGround()) {
+                stage = Stage.GAMEOVER_COOLDOWN;
+            }
+            else {
+                //Update siavash until gravity forces it to collide with ground
+                siavash.update(dt);
             }
         }
+        else if (stage == Stage.GAMEOVER_COOLDOWN) {
+            //Change dt for flash effect (as stages overlap)
+            gameOverFlashDt -= GAME_OVER_FLASH_ALPHA_DECREMENT_STEP;
 
-        //Collision detection
-        if (playerCollides()) {
-            siavash.playCrySound();
-            alive = false;
+            //Check if we should move onto post stage
+            gameOverCooldownCounter += dt;
+            if (gameOverCooldownCounter > GAME_OVER_COOLDOWN_TIME)
+                stage = Stage.GAMEOVER_POST;
         }
-
-        //Update scrolling background dx values
-        backgroundDx += BACKGROUND_DELTA_X;
-        groundDx += GROUND_DELTA_X;
+        else if (stage == Stage.GAMEOVER_POST) {
+            //todo
+        }
     }
 
     @Override
@@ -174,34 +186,41 @@ public class PlayState extends State {
 
 
         //Draw score on screen using font shader
-        sb.setShader(fontShader);
+        if (stage == Stage.MAIN || stage == Stage.CRASHING) {
+            sb.setShader(fontShader);
 
-        //Replace number 0 in score with letter O as the 0 looks like an 8
-        String scoreStr = Integer.toString(score).replace('0', 'O');
+            //Replace number 0 in score with letter O as the 0 looks like an 8
+            String scoreStr = Integer.toString(score).replace('0', 'O');
 
-        //Draw score twice, white over black to simulate some bottom-right corner drop shadow
-        eightBitWonder.getData().setScale(0.70f);
-        eightBitWonder.setColor(Color.BLACK);
-        glyphLayout.setText(eightBitWonder, scoreStr);
-        eightBitWonder.draw(sb, glyphLayout, cam.viewportWidth/2 - glyphLayout.width/2, cam.viewportHeight*0.95f);
+            //Draw score twice, white over black to simulate some bottom-right corner drop shadow
+            eightBitWonder.getData().setScale(0.70f);
+            eightBitWonder.setColor(Color.BLACK);
+            glyphLayout.setText(eightBitWonder, scoreStr);
+            eightBitWonder.draw(sb, glyphLayout, cam.viewportWidth / 2 - glyphLayout.width / 2, cam.viewportHeight * 0.95f);
 
-        eightBitWonder.getData().setScale(0.65f);
-        eightBitWonder.setColor(Color.WHITE);
-        glyphLayout.setText(eightBitWonder, scoreStr);
-        eightBitWonder.draw(sb, glyphLayout, cam.viewportWidth/2 - glyphLayout.width/2, cam.viewportHeight*0.95f);
+            eightBitWonder.getData().setScale(0.65f);
+            eightBitWonder.setColor(Color.WHITE);
+            glyphLayout.setText(eightBitWonder, scoreStr);
+            eightBitWonder.draw(sb, glyphLayout, cam.viewportWidth / 2 - glyphLayout.width / 2, cam.viewportHeight * 0.95f);
 
-        sb.setShader(null);
+            sb.setShader(null);
+        }
 
-        //If player is not alive and we need to draw flash effect using shape renderer
-        if (!alive && gameOverFlashDt >= 0) {
+        //Draw white flash (fade out from white) on screen as we crash
+        if (stage != Stage.MAIN && gameOverFlashDt >= 0) {
             Texture texture = new Texture("white1x1pixel.png");
             Color c = sb.getColor();
             sb.setColor(c.r, c.g, c.b, gameOverFlashDt);
             sb.draw(texture, 0, 0, (int) cam.viewportWidth, (int) cam.viewportHeight);
             sb.setColor(c);
         }
-
         sb.end();
+
+        //todo
+
+        if (stage == Stage.GAMEOVER_POST) {
+            gameOverState.render(sb);
+        }
     }
 
     @Override
@@ -212,6 +231,8 @@ public class PlayState extends State {
 
         for (Cage cage : cages)
             cage.dispose();
+
+        gameOverState.dispose();
     }
 
 
