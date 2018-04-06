@@ -5,6 +5,8 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
 import com.mohammadg.flappysiavash.FlappySiavashGame;
 import com.mohammadg.flappysiavash.Helper;
 import com.mohammadg.flappysiavash.sprites.Cage;
@@ -26,21 +28,29 @@ public class PlayState extends State {
         CRASHING, //Collided with object and falling towards ground
         GAMEOVER_COOLDOWN, //Collided with ground and waiting
         GAMEOVER_POST, //Game is now over, show game over menu
+        PAUSED, //Game paused
     }
 
+    //Textures
     private Texture background;
-    private float backgroundDx;
     private Ground ground;
-    private float groundDx;
     private Siavash siavash;
-    private float gameOverFlashDt;
     private ArrayList<Cage> cages;
-    private int score;
-    private Stage stage;
+    private Texture paused;
+    private Texture resume;
+    private Texture whitePixel;
 
+    private Rectangle pausedResumeBounds;
+
+    private float backgroundDx = 0.0f;
+    private float groundDx = 0.0f;
+    private float gameOverCooldownCounter = 0.0f;
+    private float gameOverFlashDt = GAME_OVER_FLASH_ALPHA_START;
+
+    private int score = 0;
+    private Stage stage = Stage.MAIN;
     private GameOverState gameOverState;
-    private float gameOverCooldownCounter;
-    Preferences preferences;
+    private Preferences preferences;
 
     protected PlayState(GameStateManager gsm) {
         super(gsm);
@@ -49,14 +59,10 @@ public class PlayState extends State {
 
         background = new Texture("bg.png");
         background.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat); //set texture to repeat on x
-        backgroundDx = 0.0f;
-
         ground = new Ground(0,0, (int)cam.viewportWidth, (int)(cam.viewportHeight*0.12f));
         ground.getGround().setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat); //set texture to repeat on x
-        groundDx = 0.0f;
 
         siavash = new Siavash(cam, (int)(cam.viewportWidth*0.20), (int)(cam.viewportHeight*0.75)); //starting position
-        gameOverFlashDt = GAME_OVER_FLASH_ALPHA_START;
 
         cages = new ArrayList<Cage>();
         int basePos = (int)cam.viewportWidth; //Start at viewport width to create initial opening
@@ -67,25 +73,50 @@ public class PlayState extends State {
             basePos += cage.getTopCage().getWidth() + (cam.viewportWidth / NUM_CAGES_PER_VIEWPORT);
         }
 
-        score = 0;
+        paused = new Texture("button_pause.png");
+        resume = new Texture("button_resume.png");
+        pausedResumeBounds = new Rectangle(cam.viewportWidth*0.05f, cam.viewportHeight*0.95f,
+                paused.getWidth(), paused.getHeight());
 
-        stage = Stage.MAIN;
+        whitePixel = new Texture("white1x1pixel.png");
 
         gameOverState = new GameOverState(gsm);
-
-        gameOverCooldownCounter = 0.0f;
-
         preferences = Gdx.app.getPreferences("FlappySiavash Storage");
     }
 
     @Override
     protected void handleInput() {
         if (stage == Stage.MAIN) {
+            if (Gdx.input.justTouched()) {
+                //Check if paused pressed
+                Vector3 tmp = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0.0f);
+                cam.unproject(tmp);
+                if (pausedResumeBounds.contains(tmp.x, tmp.y)) {
+                    stage = Stage.PAUSED;
+                    return;
+                }
+
+                //Jump
+                siavash.jump();
+            }
+
+            //Jump
             if (Gdx.input.justTouched())
                 siavash.jump();
         }
         else if (stage == Stage.GAMEOVER_POST) {
             gameOverState.handleInput();
+        }
+        else if (stage == Stage.PAUSED) {
+            //Check if resumed pressed
+            if (Gdx.input.justTouched()) {
+                //Check if paused pressed
+                Vector3 tmp = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0.0f);
+                cam.unproject(tmp);
+                if (pausedResumeBounds.contains(tmp.x, tmp.y)) {
+                    stage = Stage.MAIN;
+                }
+            }
         }
     }
 
@@ -185,7 +216,7 @@ public class PlayState extends State {
                 (int)ground.getDimensions().x, (int)ground.getDimensions().y);
 
         //Draw score on screen using font shader
-        if (stage == Stage.MAIN || stage == Stage.CRASHING || stage == Stage.GAMEOVER_COOLDOWN) {
+        if (stage == Stage.MAIN || stage == Stage.PAUSED || stage == Stage.CRASHING || stage == Stage.GAMEOVER_COOLDOWN) {
             //Replace number 0 in score with letter O as the 0 looks like an 8
             String scoreStr = Integer.toString(score).replace('0', 'O');
             Color white = new Color(1.0f, 1.0f, 1.0f, 1.0f-gameOverCooldownCounter*2*0.75f);
@@ -202,12 +233,27 @@ public class PlayState extends State {
                     cam.viewportWidth / 2 - gsm.assetManager.getGlyphLayout().width / 2, cam.viewportHeight * 0.95f);
         }
 
+        //Draw tint if paused
+        if (stage == Stage.PAUSED) {
+            Color c = sb.getColor();
+            sb.setColor(c.r, c.g, c.b, 0.5f);
+            sb.draw(whitePixel, 0, 0, (int) cam.viewportWidth, (int) cam.viewportHeight);
+            sb.setColor(c);
+        }
+
+        //Draw pause/resume buttons over tint
+        if (stage == Stage.MAIN) {
+            sb.draw(paused, pausedResumeBounds.x, pausedResumeBounds.y);
+        }
+        else if (stage == Stage.PAUSED) {
+            sb.draw(resume, pausedResumeBounds.x, pausedResumeBounds.y);
+        }
+
         //Draw white flash (fade out from white) on screen as we crash
-        if (stage != Stage.MAIN && gameOverFlashDt >= 0) {
-            Texture texture = new Texture("white1x1pixel.png");
+        if (stage != Stage.MAIN && stage != Stage.PAUSED && gameOverFlashDt >= 0) {
             Color c = sb.getColor();
             sb.setColor(c.r, c.g, c.b, gameOverFlashDt);
-            sb.draw(texture, 0, 0, (int) cam.viewportWidth, (int) cam.viewportHeight);
+            sb.draw(whitePixel, 0, 0, (int) cam.viewportWidth, (int) cam.viewportHeight);
             sb.setColor(c);
         }
         sb.end();
@@ -226,6 +272,9 @@ public class PlayState extends State {
 
         for (Cage cage : cages)
             cage.dispose();
+
+        paused.dispose();
+        resume.dispose();
 
         gameOverState.dispose();
     }
