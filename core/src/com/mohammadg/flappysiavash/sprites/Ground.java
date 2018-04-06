@@ -19,10 +19,6 @@ public class Ground {
         ground.dispose();
     }
 
-    public boolean collides(Rectangle playerBounds) {
-        return playerBounds.overlaps(this.bounds);
-    }
-
     //Getter
     public Texture getGround() {
         return ground;
@@ -32,4 +28,7 @@ public class Ground {
         return dimensions;
     }
 
+    public Rectangle getBounds() {
+        return bounds;
+    }
 }

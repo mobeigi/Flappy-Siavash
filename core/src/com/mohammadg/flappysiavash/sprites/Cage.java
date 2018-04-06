@@ -62,10 +62,6 @@ public class Cage {
         this.botCageBounds.set(botCagePos.x, botCagePos.y, botCage.getWidth(), botCage.getHeight());
     }
 
-    public boolean collides(Rectangle playerBounds) {
-        return playerBounds.overlaps(this.topCageBounds) || playerBounds.overlaps(this.botCageBounds);
-    }
-
     //Getters
     public Texture getTopCage() {
         return topCage;
@@ -81,5 +77,13 @@ public class Cage {
 
     public Vector2 getBotCagePos() {
         return botCagePos;
+    }
+
+    public Rectangle getTopCageBounds() {
+        return topCageBounds;
+    }
+
+    public Rectangle getBotCageBounds() {
+        return botCageBounds;
     }
 }

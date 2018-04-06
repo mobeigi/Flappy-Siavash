@@ -5,6 +5,8 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.mohammadg.flappysiavash.FlappySiavashGame;
@@ -22,6 +24,7 @@ public class PlayState extends State {
     private static final float GAME_OVER_COOLDOWN_TIME = 1.0f;
     private static final float GAME_OVER_FLASH_ALPHA_START = 0.8f;
     private static final float GAME_OVER_FLASH_ALPHA_DECREMENT_STEP = 0.05f;
+    private static final float SIAVASH_ROTATION_STEP = 5.0f;
 
     public enum Stage {
         MAIN, //Actively playing
@@ -44,6 +47,7 @@ public class PlayState extends State {
 
     private float backgroundDx = 0.0f;
     private float groundDx = 0.0f;
+    private float siavashRot = 0.0f;
     private float gameOverCooldownCounter = 0.0f;
     private float gameOverFlashDt = GAME_OVER_FLASH_ALPHA_START;
 
@@ -148,6 +152,7 @@ public class PlayState extends State {
 
             //Collision detection
             if (playerCollides()) {
+                siavash.justCrashed();
                 siavash.playCrySound();
                 stage = Stage.CRASHING;
 
@@ -177,6 +182,7 @@ public class PlayState extends State {
             else {
                 //Update siavash until gravity forces it to collide with ground
                 siavash.update(dt);
+                siavashRot = Math.max(siavashRot - SIAVASH_ROTATION_STEP, -90.0f);
             }
         }
         else if (stage == Stage.GAMEOVER_COOLDOWN) {
@@ -203,8 +209,15 @@ public class PlayState extends State {
                 (int) (background.getWidth() + backgroundDx), background.getHeight(),
                 background.getWidth(), background.getHeight());
 
-        sb.draw(siavash.getTextureRegion(), siavash.getPosition().x, siavash.getPosition().y);
+        //Siavash
+        sb.draw(siavash.getTextureRegion(),
+                siavash.getPosition().x,
+                siavash.getPosition().y,
+                siavash.getBounds().getOriginX(), siavash.getBounds().getOriginY(),
+                siavash.getTextureRegion().getRegionWidth(), siavash.getTextureRegion().getRegionHeight(),
+                1.0f, 1.0f, siavashRot);
 
+        //Cages
         for (Cage cage : cages) {
             sb.draw(cage.getTopCage(), cage.getTopCagePos().x, cage.getTopCagePos().y);
             sb.draw(cage.getBotCage(), cage.getBotCagePos().x, cage.getBotCagePos().y);
@@ -248,7 +261,6 @@ public class PlayState extends State {
         else if (stage == Stage.PAUSED) {
             sb.draw(resume, pausedResumeBounds.x, pausedResumeBounds.y);
         }
-
         //Draw white flash (fade out from white) on screen as we crash
         if (stage != Stage.MAIN && stage != Stage.PAUSED && gameOverFlashDt >= 0) {
             Color c = sb.getColor();
@@ -275,7 +287,7 @@ public class PlayState extends State {
 
         paused.dispose();
         resume.dispose();
-
+        whitePixel.dispose();
         gameOverState.dispose();
     }
 
@@ -286,15 +298,30 @@ public class PlayState extends State {
     }
 
     public boolean playerCollidesGround() {
-        return ground.collides(siavash.getBounds());
+        Polygon siavashBounds = siavash.getBounds();
+        siavashBounds.setRotation(siavashRot);
+        return isPolyRecCollision(siavashBounds, ground.getBounds());
     }
 
     public boolean playerCollidesCage() {
+        Polygon siavashBounds = siavash.getBounds();
+        siavashBounds.setRotation(siavashRot);
         for (Cage cage : cages) {
-            if (cage.collides(siavash.getBounds()))
+            if (isPolyRecCollision(siavashBounds, cage.getTopCageBounds()) || isPolyRecCollision(siavashBounds, cage.getBotCageBounds()))
                 return true;
         }
 
+        return false;
+    }
+
+    // Check if Polygon intersects Rectangle
+    //Source: https://stackoverflow.com/a/28540488/1800854
+    private boolean isPolyRecCollision(Polygon p, Rectangle r) {
+        Polygon rPoly = new Polygon(new float[] { 0, 0, r.width, 0, r.width,
+                r.height, 0, r.height });
+        rPoly.setPosition(r.x, r.y);
+        if (Intersector.overlapConvexPolygons(rPoly, p))
+            return true;
         return false;
     }
 

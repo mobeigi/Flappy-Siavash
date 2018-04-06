@@ -5,13 +5,13 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 
 public class Siavash {
     private static final int GRAVITY = -15;
     private static final int JUMP_UNITS = 250;
-    private static final float BOUND_SCALE = 0.75f; //scale bounds width/height to provide fairer collision detection
+    private static final float BOUND_SCALE = 0.90f; //scale bounds width/height to provide fairer collision detection
 
     private static final int ANIMATION_FRAME_COUNT = 3; //number of frames in sprite sheet
     private static final float ANIMATION_CYCLE_TIME = 0.5f; //how long to show each frame
@@ -22,7 +22,7 @@ public class Siavash {
     private Texture siavashTexture;
     private Animation siavashAnimation;
 
-    private Rectangle bounds;
+    private Polygon bounds;
     private OrthographicCamera cam;
 
     private Sound flap;
@@ -37,11 +37,19 @@ public class Siavash {
         siavashTexture = new Texture("siavash_spritesheet.png");
         siavashAnimation = new Animation(siavashTexture, ANIMATION_FRAME_COUNT, ANIMATION_CYCLE_TIME);
 
-        bounds = new Rectangle(x + (siavashAnimation.getFrame().getRegionWidth()*BOUND_SCALE)/2,
-                y + (siavashAnimation.getFrame().getRegionHeight()*BOUND_SCALE)/2,
-                siavashAnimation.getFrame().getRegionWidth()*BOUND_SCALE,
-                siavashAnimation.getFrame().getRegionHeight()*BOUND_SCALE);
+        //Setup bounds as polygon (rectangle offset by bound scale)
+        int width = (int) (siavashAnimation.getFrame().getRegionWidth()*BOUND_SCALE);
+        int height = (int) (siavashAnimation.getFrame().getRegionHeight()*BOUND_SCALE);
 
+        bounds = new Polygon(new float[]{width*(1-BOUND_SCALE), height*(1-BOUND_SCALE),
+            width, height*(1-BOUND_SCALE),
+            width, height,
+            width*(1-BOUND_SCALE), height
+        });
+        bounds.setOrigin(width/2, height/2);
+        bounds.setPosition(x, y);
+
+        //Sounds
         flap = Gdx.audio.newSound(Gdx.files.internal("sfx_wing.ogg"));
         chirp = Gdx.audio.newSound(Gdx.files.internal("sia_chirp.ogg"));
         cry = Gdx.audio.newSound(Gdx.files.internal("sia_cry.ogg"));
@@ -60,8 +68,8 @@ public class Siavash {
 
         if (position.y < 0)
             position.y = 0;
-        else if (position.y > cam.viewportHeight - (siavashTexture.getHeight()/2))
-            position.y = cam.viewportHeight - (siavashTexture.getHeight()/2);
+        else if (position.y > cam.viewportHeight - (siavashAnimation.getFrame().getRegionHeight()/2))
+            position.y = cam.viewportHeight - (siavashAnimation.getFrame().getRegionHeight()/2);
 
         velocity.scl(1/dt); //reverse scale
 
@@ -85,9 +93,14 @@ public class Siavash {
         velocity.y = JUMP_UNITS;
     }
 
+    public void justCrashed() {
+        //Make velocity 0 to avoid increasing height as you rotate
+        velocity.y = Math.min(0, velocity.y);
+    }
+
     //Sounds
     public void playChirpSound() {
-        chirp.play(1.0f);
+        playChirpSound(1.0f);
     }
 
     public void playChirpSound(float f) {
@@ -111,7 +124,7 @@ public class Siavash {
         return siavashAnimation.getFrame();
     }
 
-    public Rectangle getBounds() {
+    public Polygon getBounds() {
         return bounds;
     }
 }
