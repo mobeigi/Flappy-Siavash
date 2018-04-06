@@ -13,8 +13,6 @@ public class AndroidLauncher extends AndroidApplication {
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
 		int width = FlappySiavashGame.WIDTH;
 		int height = FlappySiavashGame.HEIGHT;
-		config.resolutionStrategy = new RatioResolutionStrategy(width, height);
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		initialize(new FlappySiavashGame(), config);
 	}
 }

@@ -1,10 +1,13 @@
 package com.mohammadg.flappysiavash.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.mohammadg.flappysiavash.FlappySiavashGame;
+import com.mohammadg.flappysiavash.Helper;
 
 public class MenuState extends State {
 
@@ -21,18 +24,18 @@ public class MenuState extends State {
 
         cam.setToOrtho(false, FlappySiavashGame.WIDTH/2, FlappySiavashGame.HEIGHT/2);
 
-        this.background = new Texture("bg.png");
-        this.logo = new Texture("logo.png");
+        this.background = new Texture("images/bg.png");
+        this.logo = new Texture("images/logo.png");
         this.logoBounds = new Rectangle((cam.viewportWidth/2) - ((logo.getWidth()*0.4f)/2),
                 cam.viewportHeight*0.55f - (logo.getHeight()*0.4f)/2,
                 logo.getWidth()*0.4f, logo.getHeight()*0.4f);
 
-        this.playButton = new Texture("playbutton.png");
+        this.playButton = new Texture("images/playbutton.png");
         this.playButtonBounds = new Rectangle(cam.viewportWidth/2 - playButton.getWidth()/2,
                 cam.viewportHeight*0.35f - playButton.getHeight()/2,
                 playButton.getWidth(), playButton.getHeight());
 
-        this.siavashFace = new Texture("siavash_face_circle.png");
+        this.siavashFace = new Texture("images/siavash_face_circle.png");
         this.siavashFace.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         this.siavashFaceBounds = new Rectangle((cam.viewportWidth/2) - ((siavashFace.getWidth()*0.4f)/2),
                 logoBounds.getY() + logoBounds.getHeight(),
@@ -59,10 +62,14 @@ public class MenuState extends State {
                 background.getWidth(), background.getHeight());
 
         sb.draw(siavashFace, siavashFaceBounds.x, siavashFaceBounds.y, siavashFaceBounds.getWidth(), siavashFaceBounds.getHeight());
-
         sb.draw(logo, logoBounds.x, logoBounds.y, logoBounds.getWidth(), logoBounds.getHeight());
-
         sb.draw(playButton, playButtonBounds.x, playButtonBounds.y);
+
+        //Draw app version
+        Helper.PrepareDrawText(sb, gsm.assetManager.getVerdana(), gsm.assetManager.getGlyphLayout(), "1.0.0", Color.WHITE, 0.30f);
+        Helper.DrawText(sb, gsm.assetManager.getVerdana(), gsm.assetManager.getGlyphLayout(), gsm.assetManager.getFontShader(),
+                (float) (cam.viewportWidth*0.98) - (gsm.assetManager.getGlyphLayout().width),
+                (float) (cam.viewportHeight*0.02f) + (gsm.assetManager.getGlyphLayout().height));
 
         sb.end();
     }

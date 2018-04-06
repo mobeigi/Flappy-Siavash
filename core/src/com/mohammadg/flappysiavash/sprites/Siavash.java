@@ -34,7 +34,7 @@ public class Siavash {
         position = new Vector2(x, y);
         velocity = new Vector2(0, 0);
 
-        siavashTexture = new Texture("siavash_spritesheet.png");
+        siavashTexture = new Texture("images/siavash_spritesheet.png");
         siavashAnimation = new Animation(siavashTexture, ANIMATION_FRAME_COUNT, ANIMATION_CYCLE_TIME);
 
         //Setup bounds as polygon (rectangle offset by bound scale)
@@ -50,9 +50,9 @@ public class Siavash {
         bounds.setPosition(x, y);
 
         //Sounds
-        flap = Gdx.audio.newSound(Gdx.files.internal("sfx_wing.ogg"));
-        chirp = Gdx.audio.newSound(Gdx.files.internal("sia_chirp.ogg"));
-        cry = Gdx.audio.newSound(Gdx.files.internal("sia_cry.ogg"));
+        flap = Gdx.audio.newSound(Gdx.files.internal("sounds/sfx_wing.ogg"));
+        chirp = Gdx.audio.newSound(Gdx.files.internal("sounds/sia_chirp.ogg"));
+        cry = Gdx.audio.newSound(Gdx.files.internal("sounds/sia_cry.ogg"));
     }
 
     public void update(float dt) {

@@ -10,7 +10,7 @@ public class Ground {
     private Rectangle bounds;
 
     public Ground(int x, int y, int width, int height) {
-        ground = new Texture("ground.png");
+        ground = new Texture("images/ground.png");
         dimensions = new Vector2(width, height);
         bounds = new Rectangle(x, y, width, height);
     }

@@ -24,9 +24,9 @@ public class GameOverState extends State {
     protected GameOverState(GameStateManager gsm) {
         super(gsm);
         cam.setToOrtho(false, FlappySiavashGame.WIDTH/2, FlappySiavashGame.HEIGHT/2);
-        gameOver = new Texture("gameover.png");
+        gameOver = new Texture("images/gameover.png");
         gameOverMenuDimensions = new Vector2(gameOver.getWidth()*0.85f, gameOver.getHeight()*0.85f);
-        this.playButton = new Texture("playbutton.png");
+        this.playButton = new Texture("images/playbutton.png");
         this.playButtonBounds = new Rectangle(cam.viewportWidth/2 - playButton.getWidth()/2,
                 cam.viewportHeight*0.35f - playButton.getHeight()/2,
                 playButton.getWidth(), playButton.getHeight());

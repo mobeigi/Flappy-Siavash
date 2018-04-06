@@ -22,8 +22,8 @@ public class Cage {
 
     public Cage(OrthographicCamera cam, float x, int lowestOpening) {
         this.cam = cam;
-        topCage = new Texture("topcage.png");
-        botCage = new Texture("bottomcage.png");
+        topCage = new Texture("images/topcage.png");
+        botCage = new Texture("images/bottomcage.png");
 
         rand = new Random(System.currentTimeMillis());
         topCagePos = new Vector2();

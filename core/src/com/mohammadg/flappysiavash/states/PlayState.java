@@ -5,10 +5,9 @@ import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.Polygon;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.*;
 import com.mohammadg.flappysiavash.FlappySiavashGame;
 import com.mohammadg.flappysiavash.Helper;
 import com.mohammadg.flappysiavash.sprites.Cage;
@@ -43,6 +42,7 @@ public class PlayState extends State {
     private Texture resume;
     private Texture whitePixel;
 
+    private Vector2 pausedResumePos;
     private Rectangle pausedResumeBounds;
 
     private float backgroundDx = 0.0f;
@@ -61,7 +61,7 @@ public class PlayState extends State {
 
         cam.setToOrtho(false, FlappySiavashGame.WIDTH/2, FlappySiavashGame.HEIGHT/2);
 
-        background = new Texture("bg.png");
+        background = new Texture("images/bg.png");
         background.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat); //set texture to repeat on x
         ground = new Ground(0,0, (int)cam.viewportWidth, (int)(cam.viewportHeight*0.12f));
         ground.getGround().setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat); //set texture to repeat on x
@@ -77,12 +77,13 @@ public class PlayState extends State {
             basePos += cage.getTopCage().getWidth() + (cam.viewportWidth / NUM_CAGES_PER_VIEWPORT);
         }
 
-        paused = new Texture("button_pause.png");
-        resume = new Texture("button_resume.png");
-        pausedResumeBounds = new Rectangle(cam.viewportWidth*0.05f, cam.viewportHeight*0.95f,
-                paused.getWidth(), paused.getHeight());
+        paused = new Texture("images/button_pause.png");
+        resume = new Texture("images/button_resume.png");
+        pausedResumePos = new Vector2(cam.viewportWidth*0.05f, cam.viewportHeight*0.95f);
+        pausedResumeBounds = new Rectangle(0, cam.viewportHeight - cam.viewportHeight*0.10f + paused.getHeight(),
+                cam.viewportWidth*0.10f + paused.getWidth(), cam.viewportHeight*0.10f + paused.getHeight());
 
-        whitePixel = new Texture("white1x1pixel.png");
+        whitePixel = new Texture("images/white1x1pixel.png");
 
         gameOverState = new GameOverState(gsm);
         preferences = Gdx.app.getPreferences("FlappySiavash Storage");
@@ -209,6 +210,11 @@ public class PlayState extends State {
                 (int) (background.getWidth() + backgroundDx), background.getHeight(),
                 background.getWidth(), background.getHeight());
 
+        //Draw scrolling ground
+        sb.draw(ground.getGround(), cam.position.x - (cam.viewportWidth/2), 0,
+                (int) (ground.getGround().getWidth() + groundDx), (int)ground.getGround().getHeight(),
+                (int)ground.getDimensions().x, (int)ground.getDimensions().y);
+
         //Siavash
         sb.draw(siavash.getTextureRegion(),
                 siavash.getPosition().x,
@@ -220,13 +226,12 @@ public class PlayState extends State {
         //Cages
         for (Cage cage : cages) {
             sb.draw(cage.getTopCage(), cage.getTopCagePos().x, cage.getTopCagePos().y);
-            sb.draw(cage.getBotCage(), cage.getBotCagePos().x, cage.getBotCagePos().y);
-        }
 
-        //Draw scrolling ground
-        sb.draw(ground.getGround(), cam.position.x - (cam.viewportWidth/2), 0,
-                (int) (ground.getGround().getWidth() + groundDx), (int)ground.getGround().getHeight(),
-                (int)ground.getDimensions().x, (int)ground.getDimensions().y);
+            //Don't draw botcage excess so it doesn't overlap the ground
+            TextureRegion textureRegion = new TextureRegion(cage.getBotCage(), 0, 0,
+                    (int)cage.getBotCageBounds().width, (int)cage.getBotCageBounds().height - (int)(Math.abs(cage.getBotCagePos().y) + ground.getDimensions().y));
+            sb.draw(textureRegion, cage.getBotCagePos().x, ground.getDimensions().y);
+        }
 
         //Draw score on screen using font shader
         if (stage == Stage.MAIN || stage == Stage.PAUSED || stage == Stage.CRASHING || stage == Stage.GAMEOVER_COOLDOWN) {
@@ -256,10 +261,15 @@ public class PlayState extends State {
 
         //Draw pause/resume buttons over tint
         if (stage == Stage.MAIN) {
-            sb.draw(paused, pausedResumeBounds.x, pausedResumeBounds.y);
+            sb.draw(paused, pausedResumePos.x, pausedResumePos.y);
         }
         else if (stage == Stage.PAUSED) {
-            sb.draw(resume, pausedResumeBounds.x, pausedResumeBounds.y);
+            sb.draw(resume, pausedResumePos.x, pausedResumePos.y);
+
+            Helper.PrepareDrawText(sb, gsm.assetManager.getEightBitWonder(), gsm.assetManager.getGlyphLayout(), "PAUSED", new Color(232f/255, 96f/255, 0, 0.9f), 1.0f);
+            Helper.DrawText(sb, gsm.assetManager.getEightBitWonder(), gsm.assetManager.getGlyphLayout(), gsm.assetManager.getFontShader(),
+                    (float) (cam.viewportWidth/2) - (gsm.assetManager.getGlyphLayout().width/2),
+                    (float) (cam.viewportHeight/2) + (gsm.assetManager.getGlyphLayout().height/2));
         }
         //Draw white flash (fade out from white) on screen as we crash
         if (stage != Stage.MAIN && stage != Stage.PAUSED && gameOverFlashDt >= 0) {
