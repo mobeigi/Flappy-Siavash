@@ -14,7 +14,7 @@ Images
 Play Online
 -----
 Play online at:  
-https://mobeigi.com/blog/projects/flappysiavash/
+https://dev.mobeigi.com/flappysiavash/
 
 Play Store
 -----
