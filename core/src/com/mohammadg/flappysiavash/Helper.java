@@ -1,4 +1,4 @@
-package com.mohammadg.flappysiavash;
+package com.mobeigi.flappysiavash;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;

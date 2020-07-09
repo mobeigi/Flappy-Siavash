@@ -1,4 +1,4 @@
-package com.mohammadg.flappysiavash.states;
+package com.mobeigi.flappysiavash.states;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;

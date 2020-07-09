@@ -1,4 +1,4 @@
-package com.mohammadg.flappysiavash.states;
+package com.mobeigi.flappysiavash.states;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -7,8 +7,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.mohammadg.flappysiavash.FlappySiavashGame;
-import com.mohammadg.flappysiavash.Helper;
+import com.mobeigi.flappysiavash.FlappySiavashGame;
+import com.mobeigi.flappysiavash.Helper;
 
 public class GameOverState extends State {
 

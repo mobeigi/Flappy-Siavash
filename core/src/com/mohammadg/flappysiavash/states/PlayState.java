@@ -1,4 +1,4 @@
-package com.mohammadg.flappysiavash.states;
+package com.mobeigi.flappysiavash.states;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
@@ -8,11 +8,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.*;
-import com.mohammadg.flappysiavash.FlappySiavashGame;
-import com.mohammadg.flappysiavash.Helper;
-import com.mohammadg.flappysiavash.sprites.Cage;
-import com.mohammadg.flappysiavash.sprites.Ground;
-import com.mohammadg.flappysiavash.sprites.Siavash;
+import com.mobeigi.flappysiavash.FlappySiavashGame;
+import com.mobeigi.flappysiavash.Helper;
+import com.mobeigi.flappysiavash.sprites.Cage;
+import com.mobeigi.flappysiavash.sprites.Ground;
+import com.mobeigi.flappysiavash.sprites.Siavash;
 
 import java.util.ArrayList;
 

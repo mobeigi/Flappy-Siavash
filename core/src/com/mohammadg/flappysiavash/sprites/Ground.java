@@ -1,4 +1,4 @@
-package com.mohammadg.flappysiavash.sprites;
+package com.mobeigi.flappysiavash.sprites;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;

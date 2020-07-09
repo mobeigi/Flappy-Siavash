@@ -1,4 +1,4 @@
-package com.mohammadg.flappysiavash;
+package com.mobeigi.flappysiavash;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;

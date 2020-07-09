@@ -1,8 +1,8 @@
-package com.mohammadg.flappysiavash.desktop;
+package com.mobeigi.flappysiavash.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
-import com.mohammadg.flappysiavash.FlappySiavashGame;
+import com.mobeigi.flappysiavash.FlappySiavashGame;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {

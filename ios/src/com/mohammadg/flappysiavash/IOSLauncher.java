@@ -1,4 +1,4 @@
-package com.mohammadg.flappysiavash;
+package com.mobeigi.flappysiavash;
 
 import com.badlogic.gdx.backends.iosrobovm.IOSApplication;
 import com.badlogic.gdx.backends.iosrobovm.IOSApplicationConfiguration;

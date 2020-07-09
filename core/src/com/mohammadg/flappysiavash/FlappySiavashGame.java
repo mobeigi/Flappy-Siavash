@@ -1,11 +1,11 @@
-package com.mohammadg.flappysiavash;
+package com.mobeigi.flappysiavash;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.mohammadg.flappysiavash.states.GameStateManager;
-import com.mohammadg.flappysiavash.states.MenuState;
+import com.mobeigi.flappysiavash.states.GameStateManager;
+import com.mobeigi.flappysiavash.states.MenuState;
 
 public class FlappySiavashGame extends ApplicationAdapter {
 	public static final int WIDTH = 480;

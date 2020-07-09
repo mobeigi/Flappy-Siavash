@@ -1,9 +1,9 @@
-package com.mohammadg.flappysiavash.client;
+package com.mobeigi.flappysiavash.client;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;
-import com.mohammadg.flappysiavash.FlappySiavashGame;
+import com.mobeigi.flappysiavash.FlappySiavashGame;
 
 public class HtmlLauncher extends GwtApplication {
 

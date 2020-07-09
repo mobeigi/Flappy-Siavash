@@ -4,7 +4,7 @@ sourceCompatibility = '1.7'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 ext {
-	mainClassName = "com.mohammadg.flappysiavash.IOSLauncher"
+	mainClassName = "com.mobeigi.flappysiavash.IOSLauncher"
 }
 
 launchIPhoneSimulator.dependsOn build

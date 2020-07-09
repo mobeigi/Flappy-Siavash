@@ -1,7 +1,7 @@
-package com.mohammadg.flappysiavash.states;
+package com.mobeigi.flappysiavash.states;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.mohammadg.flappysiavash.AssetManager;
+import com.mobeigi.flappysiavash.AssetManager;
 
 import java.util.Stack;
 

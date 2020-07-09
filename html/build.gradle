@@ -7,8 +7,8 @@ gwt {
     minHeapSize="1G"
 
     src = files(file("src/")) // Needs to be in front of "modules" below.
-    modules 'com.mohammadg.flappysiavash.GdxDefinition'
-    devModules 'com.mohammadg.flappysiavash.GdxDefinitionSuperdev'
+    modules 'com.mobeigi.flappysiavash.GdxDefinition'
+    devModules 'com.mobeigi.flappysiavash.GdxDefinitionSuperdev'
     project.webAppDirName = 'webapp'
 
     compiler {

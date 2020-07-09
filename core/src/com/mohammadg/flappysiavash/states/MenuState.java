@@ -1,4 +1,4 @@
-package com.mohammadg.flappysiavash.states;
+package com.mobeigi.flappysiavash.states;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -6,8 +6,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
-import com.mohammadg.flappysiavash.FlappySiavashGame;
-import com.mohammadg.flappysiavash.Helper;
+import com.mobeigi.flappysiavash.FlappySiavashGame;
+import com.mobeigi.flappysiavash.Helper;
 
 public class MenuState extends State {
 

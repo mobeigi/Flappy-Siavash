@@ -1,4 +1,4 @@
-package com.mohammadg.flappysiavash;
+package com.mobeigi.flappysiavash;
 
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
